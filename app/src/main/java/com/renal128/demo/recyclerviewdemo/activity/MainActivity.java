@@ -1,6 +1,5 @@
 package com.renal128.demo.recyclerviewdemo.activity;
 
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -40,12 +39,10 @@ public class MainActivity extends FragmentActivity
 
     public void showFragment(View view) {
 
-        Fragment newFragment = PopUpFragment.newInstance(1500);
+        Fragment newFragment = PopUpFragment.newInstance(5000);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, newFragment, PopUpFragment.class.getSimpleName())
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack(null)
                 .commit();
     }
 
@@ -53,7 +50,7 @@ public class MainActivity extends FragmentActivity
         PopUpFragment popup  = (PopUpFragment)getSupportFragmentManager()
                 .findFragmentByTag(PopUpFragment.class.getSimpleName());
         if(popup != null){
-            String text = "Message " + new Random().nextGaussian();
+            String text = "Message " + new Random().nextInt();
             int icon = Math.abs(new Random().nextInt() % 3);
             popup.addMessage0ToPopUp(icon, text);
         }
