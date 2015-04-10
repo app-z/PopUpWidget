@@ -158,7 +158,8 @@ public class PopUpFragment extends Fragment{
         adapter.notifyDataSetChanged();
 
         if ( adapter.getItemCount() > 0 ) {
-            mListener.showPopUpFrugment();
+            cardView.setVisibility(View.VISIBLE);
+            mListener.onShowPopUpFrugment();
         }
     }
 
@@ -169,7 +170,8 @@ public class PopUpFragment extends Fragment{
             adapter.notifyDataSetChanged();
         }
         if ( adapter.getItemCount() == 0 ) {
-            mListener.hidePopUpFrugment();
+            cardView.setVisibility(View.GONE);
+            mListener.onHidePopUpFrugment();
         }
     }
 
@@ -204,8 +206,8 @@ public class PopUpFragment extends Fragment{
      */
     public interface OnFragmentInteractionListener {
         void onPopUpFragmentStart();
-        void hidePopUpFrugment();
-        void showPopUpFrugment();
+        void onHidePopUpFrugment();
+        void onShowPopUpFrugment();
     }
 
 

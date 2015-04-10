@@ -80,19 +80,20 @@ public class MainActivity extends FragmentActivity
     }
 
             @Override
-    public void hidePopUpFrugment() {
-        PopUpFragment popup  = (PopUpFragment)getSupportFragmentManager()
+    public void onHidePopUpFrugment() {
+        /*PopUpFragment popup  = (PopUpFragment)getSupportFragmentManager()
                 .findFragmentByTag(PopUpFragment.class.getSimpleName());
         if(popup != null) {
             getSupportFragmentManager()
                     .beginTransaction()
                     .hide(popup)
                     .commit();
-        }
+        }*/
     }
 
     @Override
-    public void showPopUpFrugment() {
+    public void onShowPopUpFrugment() {
+        /*
         PopUpFragment popup  = (PopUpFragment)getSupportFragmentManager()
                 .findFragmentByTag(PopUpFragment.class.getSimpleName());
         if(popup != null) {
@@ -101,5 +102,6 @@ public class MainActivity extends FragmentActivity
                     .show(popup)
                     .commit();
         }
+        */
     }
 }
