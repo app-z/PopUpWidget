@@ -34,7 +34,7 @@ public class PopUpFragment extends Fragment{
     private RecyclerViewAdapter adapter;
     private CardView cardView;
     private RecyclerView recyclerView;
-
+    private List<Record> records = new ArrayList<Record>();
 
     /**
      * Use this factory method to create a new instance of
@@ -73,6 +73,18 @@ public class PopUpFragment extends Fragment{
         //setRetainInstance(true);
 
         messageHandler = new HandlerOverlayMessages(this);
+
+        if (savedInstanceState != null) {
+            records = savedInstanceState.getParcelableArrayList(PopUpFragment.class.getSimpleName());
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+         outState.putParcelableArrayList(
+                    PopUpFragment.class.getSimpleName(),
+                    (java.util.ArrayList<? extends android.os.Parcelable>) records);
+        super.onSaveInstanceState(outState);
     }
 
 
@@ -112,9 +124,6 @@ public class PopUpFragment extends Fragment{
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_popup, container, false);
-
-        List<Record> records = new ArrayList<Record>();
-
         recyclerView = (RecyclerView)view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         adapter = new RecyclerViewAdapter(records);
@@ -193,6 +202,7 @@ public class PopUpFragment extends Fragment{
         super.onDetach();
         mListener = null;
     }
+
 
     /**
      * This interface must be implemented by activities that contain this

@@ -3,7 +3,6 @@ package com.renal128.demo.recyclerviewdemo.activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
@@ -17,14 +16,17 @@ public class MainActivity extends FragmentActivity
         implements PopUpFragment.OnFragmentInteractionListener
         {
 
-    Handler messageHandler;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
 
     public void showRecycleView(View view) {
         Intent intent = new Intent(this, RecyclerViewActivity.class);
@@ -66,20 +68,30 @@ public class MainActivity extends FragmentActivity
     }
 
 
+    static boolean started;
 
     @Override
     public void onPopUpFragmentStart() {
-        PopUpFragment popup  = (PopUpFragment)getSupportFragmentManager()
-                .findFragmentByTag(PopUpFragment.class.getSimpleName());
-        if (popup != null){
-            for (int i = 0; i<5; i++){
-                popup.addMessage0ToPopUp(i%3, "Item №" + i);
-            }
 
+        PopUpFragment popup = (PopUpFragment) getSupportFragmentManager()
+                .findFragmentByTag(PopUpFragment.class.getSimpleName());
+
+        if(!started) {
+            started = true;
+            if (popup != null) {
+                for (int i = 0; i < 5; i++) {
+                    popup.addMessage0ToPopUp(i % 3, "Item №" + i);
+                }
+
+            }
         }
     }
 
-            @Override
+
+
+
+
+    @Override
     public void onHidePopUpFrugment() {
         /*PopUpFragment popup  = (PopUpFragment)getSupportFragmentManager()
                 .findFragmentByTag(PopUpFragment.class.getSimpleName());
