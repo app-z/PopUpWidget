@@ -62,8 +62,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         int position = records.indexOf(record);
         Record copy = record.copy();
         records.add(position + 1, copy);
-        //notifyItemInserted(position + 1);
-        notifyDataSetChanged();
+        notifyItemInserted(position + 1);
+        //notifyDataSetChanged();
     }
 
     private void delete(Record record) {
@@ -71,8 +71,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         Log.i(">" , "position=" + position);
         if( position != -1 ) {
             records.remove(position);
-            //notifyItemRemoved(position);
-            notifyDataSetChanged();
+            notifyItemRemoved(position);
+            //notifyDataSetChanged();
         }
     }
 

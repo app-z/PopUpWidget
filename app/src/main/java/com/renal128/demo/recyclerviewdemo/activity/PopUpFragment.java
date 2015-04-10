@@ -10,6 +10,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -92,7 +93,7 @@ public class PopUpFragment extends Fragment{
 
         @Override
         public void run() {
-            removeMessagePopUp();
+            //removeMessagePopUp();
             timerHandler.postDelayed(this, timer_interval);
         }
     };
@@ -123,7 +124,7 @@ public class PopUpFragment extends Fragment{
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_popup, container, false);
         recyclerView = (RecyclerView)view.findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
+        // recyclerView.setHasFixedSize(true);
         adapter = new RecyclerViewAdapter(records);
         LinearLayoutManager layoutManager = new MyLinearLayoutManager(getActivity());
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
@@ -160,9 +161,14 @@ public class PopUpFragment extends Fragment{
         Record record = new Record();
         record.setName(text);
         record.setType(Record.Type.values()[type]);
-
         adapter.getRecords().add(record);
-        adapter.notifyDataSetChanged();
+        adapter.notifyItemInserted(adapter.getItemCount()-1);
+        //adapter.notifyDataSetChanged();
+
+        // Bellow there is hack. First show RecyclerView
+        if ( adapter.getItemCount() == 1 ) {
+            adapter.notifyDataSetChanged();
+        }
 
         if ( adapter.getItemCount() > 0 ) {
             cardView.setVisibility(View.VISIBLE);
@@ -174,7 +180,8 @@ public class PopUpFragment extends Fragment{
     private void removeMessage0Internal(){
         if ( adapter.getItemCount() > 0 ) {
             adapter.getRecords().remove(0);
-            adapter.notifyDataSetChanged();
+            adapter.notifyItemRemoved(0);
+            //adapter.notifyDataSetChanged();
         }
         if ( adapter.getItemCount() == 0 ) {
             cardView.setVisibility(View.GONE);
@@ -221,12 +228,23 @@ public class PopUpFragment extends Fragment{
 
     public class MyLinearLayoutManager extends LinearLayoutManager {
 
-        public MyLinearLayoutManager(Context context, int orientation, boolean reverseLayout)    {
-            super(context, orientation, reverseLayout);
-        }
-
         public MyLinearLayoutManager(Context context)    {
             super(context);
+        }
+
+        // Not worked
+        @Override
+        public RecyclerView.LayoutParams generateDefaultLayoutParams() {
+            return new RecyclerView.LayoutParams(
+                    RecyclerView.LayoutParams.WRAP_CONTENT,
+                    RecyclerView.LayoutParams.WRAP_CONTENT);
+        }
+
+        // Not worked
+        @Override
+        public boolean canScrollVertically() {
+            //We do allow scrolling
+            return true;
         }
 
         private int[] mMeasuredDimension = new int[2];
@@ -234,51 +252,79 @@ public class PopUpFragment extends Fragment{
         @Override
         public void onMeasure(RecyclerView.Recycler recycler, RecyclerView.State state,
                               int widthSpec, int heightSpec) {
-            final int widthMode = View.MeasureSpec.getMode(widthSpec);
-            final int heightMode = View.MeasureSpec.getMode(heightSpec);
-            final int widthSize = View.MeasureSpec.getSize(widthSpec);
-            final int heightSize = View.MeasureSpec.getSize(heightSpec);
-            int width = 0;
-            int height = 0;
-            for (int i = 0; i < getItemCount(); i++) {
-                measureScrapChild(recycler, i,
-                        View.MeasureSpec.makeMeasureSpec(i, View.MeasureSpec.UNSPECIFIED),
-                        View.MeasureSpec.makeMeasureSpec(i, View.MeasureSpec.UNSPECIFIED),
-                        mMeasuredDimension);
 
-                if (getOrientation() == HORIZONTAL) {
-                    width = width + mMeasuredDimension[0];
-                    if (i == 0) {
-                        height = mMeasuredDimension[1];
-                    }
-                } else {
-                    height = height + mMeasuredDimension[1];
-                    if (i == 0) {
-                        width = mMeasuredDimension[0];
+            Log.i(">", "state " + state.toString());
+
+            //if ( state.isPreLayout() ) {
+            //    super.onMeasure(recycler, state, widthSpec, heightSpec);
+            //} else
+            {
+
+                final int widthMode = View.MeasureSpec.getMode(widthSpec);
+                final int heightMode = View.MeasureSpec.getMode(heightSpec);
+                final int widthSize = View.MeasureSpec.getSize(widthSpec);
+                final int heightSize = View.MeasureSpec.getSize(heightSpec);
+                int width = 0;
+                int height = 0;
+                for (int i = 0; i < getItemCount(); i++) {
+                    if (getOrientation() == HORIZONTAL) {
+                        measureScrapChild(recycler, i,
+                                View.MeasureSpec.makeMeasureSpec(i, View.MeasureSpec.UNSPECIFIED),
+                                heightSpec,
+                                mMeasuredDimension);
+
+                        width = width + mMeasuredDimension[0];
+                        if (i == 0) {
+                            height = mMeasuredDimension[1];
+                        }
+                    } else {
+                        measureScrapChild(recycler, i,
+                                widthSpec,
+                                View.MeasureSpec.makeMeasureSpec(i, View.MeasureSpec.UNSPECIFIED),
+                                mMeasuredDimension);
+                        height = height + mMeasuredDimension[1];
+                        if (i == 0) {
+                            width = mMeasuredDimension[0];
+                        }
                     }
                 }
-            }
-            switch (widthMode) {
-                case View.MeasureSpec.EXACTLY:
-                    width = widthSize;
-                case View.MeasureSpec.AT_MOST:
-                case View.MeasureSpec.UNSPECIFIED:
-            }
+                switch (widthMode) {
+                    case View.MeasureSpec.EXACTLY:
+                        width = widthSize;
+                    case View.MeasureSpec.AT_MOST:
+                    case View.MeasureSpec.UNSPECIFIED:
+                }
 
-            switch (heightMode) {
-                case View.MeasureSpec.EXACTLY:
-                    height = heightSize;
-                case View.MeasureSpec.AT_MOST:
-                case View.MeasureSpec.UNSPECIFIED:
-            }
+                switch (heightMode) {
+                    case View.MeasureSpec.EXACTLY:
+                        height = heightSize;
+                    case View.MeasureSpec.AT_MOST:
+                    case View.MeasureSpec.UNSPECIFIED:
+                }
 
-            setMeasuredDimension(width, height);
+                setMeasuredDimension(width, height);
+            }
         }
 
         private void measureScrapChild(RecyclerView.Recycler recycler, int position, int widthSpec,
                                        int heightSpec, int[] measuredDimension) {
-            View view = recycler.getViewForPosition(position);
+
+            View view = null;
+            // Bellow there is strong hack!
+            try {
+                view = recycler.getViewForPosition(position);
+            }catch (IndexOutOfBoundsException ex){
+                Log.i(">", "IndexOutOfBoundsException = " + ex + "position : " + position);
+            }
+
+
             if (view != null) {
+
+                // For adding Item Decor Insets to view
+                //super.measureChildWithMargins(view, 0, 0);
+
+                //recycler.bindViewToPosition(view, position);
+
                 RecyclerView.LayoutParams p = (RecyclerView.LayoutParams) view.getLayoutParams();
                 int childWidthSpec = ViewGroup.getChildMeasureSpec(widthSpec,
                         getPaddingLeft() + getPaddingRight(), p.width);
