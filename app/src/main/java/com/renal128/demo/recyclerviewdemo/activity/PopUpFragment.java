@@ -93,7 +93,7 @@ public class PopUpFragment extends Fragment{
 
         @Override
         public void run() {
-            //removeMessagePopUp();
+            removeMessagePopUp();
             timerHandler.postDelayed(this, timer_interval);
         }
     };
