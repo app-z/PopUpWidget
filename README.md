@@ -6,7 +6,7 @@ Android PopUpFragment
 How to use
 
 
-Create Fragment
+Create Fragment<br>
 1500 - remove message interval in ms. Default 3000 if empty
 
 ```
@@ -21,6 +21,7 @@ Create Fragment
                 .commit();
     }
 ```
+
 Add message to PopUp
 ```
     public void addMessage(View view) {
@@ -34,6 +35,7 @@ Add message to PopUp
     }
 
 ```
+
 Remove message from PopUp
 ```
     public void removeMessage(View view) {
