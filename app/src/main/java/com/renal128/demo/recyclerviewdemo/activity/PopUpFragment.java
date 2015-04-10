@@ -41,7 +41,7 @@ public class PopUpFragment extends Fragment{
      * this fragment using the provided parameters.
      *
      * @param timer_interval .
-     * @return A new instance of fragment PlusOneFragment.
+     * @return A new instance of fragment PopUpFragment.
      */
     public static PopUpFragment newInstance(int timer_interval) {
         PopUpFragment fragment = new PopUpFragment();
@@ -87,8 +87,6 @@ public class PopUpFragment extends Fragment{
         super.onSaveInstanceState(outState);
     }
 
-
-    //runs without a timer by reposting this handler at the end of the runnable
     Handler timerHandler = new Handler();
     Runnable timerRunnable = new Runnable() {
 

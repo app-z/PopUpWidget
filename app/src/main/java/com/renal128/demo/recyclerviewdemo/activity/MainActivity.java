@@ -39,11 +39,16 @@ public class MainActivity extends FragmentActivity
 
     public void showFragment(View view) {
 
-        Fragment newFragment = PopUpFragment.newInstance(5000);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.container, newFragment, PopUpFragment.class.getSimpleName())
-                .commit();
+        PopUpFragment popup  = (PopUpFragment)getSupportFragmentManager()
+                .findFragmentByTag(PopUpFragment.class.getSimpleName());
+
+        if(popup == null) {
+            Fragment newFragment = PopUpFragment.newInstance(5000);
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.container, newFragment, PopUpFragment.class.getSimpleName())
+                    .commit();
+        }
     }
 
     public void addMessage(View view) {
@@ -65,22 +70,17 @@ public class MainActivity extends FragmentActivity
     }
 
 
-    static boolean started;
-
     @Override
     public void onPopUpFragmentStart() {
 
         PopUpFragment popup = (PopUpFragment) getSupportFragmentManager()
                 .findFragmentByTag(PopUpFragment.class.getSimpleName());
 
-        if(!started) {
-            started = true;
-            if (popup != null) {
-                for (int i = 0; i < 5; i++) {
-                    popup.addMessage0ToPopUp(i % 3, "Item №" + i);
-                }
-
+        if (popup != null) {
+            for (int i = 0; i < 5; i++) {
+                popup.addMessage0ToPopUp(i % 3, "Item №" + i);
             }
+
         }
     }
 
