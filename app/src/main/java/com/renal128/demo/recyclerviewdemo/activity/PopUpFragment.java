@@ -53,8 +53,7 @@ public class PopUpFragment extends Fragment{
     }
 
     public static PopUpFragment newInstance() {
-        PopUpFragment fragment = new PopUpFragment();
-        return fragment;
+        return new PopUpFragment();
     }
 
     public PopUpFragment() {
@@ -161,9 +160,13 @@ public class PopUpFragment extends Fragment{
         Record record = new Record();
         record.setName(text);
         record.setType(Record.Type.values()[type]);
+        long id = 1;
+        if(records.size() > 0)
+            id = records.get(records.size()-1).getId() + 1;
+        record.setId(id);
         adapter.getRecords().add(record);
-        adapter.notifyItemInserted(adapter.getItemCount()-1);
-        //adapter.notifyDataSetChanged();
+        //adapter.notifyItemInserted(adapter.getItemCount()-1);
+        adapter.notifyDataSetChanged();
 
         // Bellow there is hack. First show RecyclerView
         if ( adapter.getItemCount() == 1 ) {
@@ -180,8 +183,8 @@ public class PopUpFragment extends Fragment{
     private void removeMessage0Internal(){
         if ( adapter.getItemCount() > 0 ) {
             adapter.getRecords().remove(0);
-            adapter.notifyItemRemoved(0);
-            //adapter.notifyDataSetChanged();
+            //adapter.notifyItemRemoved(0);
+            adapter.notifyDataSetChanged();
         }
         if ( adapter.getItemCount() == 0 ) {
             cardView.setVisibility(View.GONE);
@@ -226,7 +229,179 @@ public class PopUpFragment extends Fragment{
     }
 
 
-    public class MyLinearLayoutManager extends LinearLayoutManager {
+    private class HandlerOverlayMessages <T> extends Handler {
+
+        public static final int ADD_MESSAGE = 100;
+        public static final int REMOVE_MESSAGE_0 = 101;
+        public static final String TEXT_ARG = "text";
+        public static final String ICON_ARG = "icon";
+
+        private final T fragment;
+
+        public HandlerOverlayMessages(T fragment ){
+            this.fragment = fragment;
+        }
+
+        @Override
+        public void handleMessage(Message message){
+            if (this.fragment != null){
+
+                Bundle b = message.getData();
+
+                switch (message.what){
+                    case ADD_MESSAGE:
+                        if(b == null)
+                            new IllegalArgumentException("Message should be have params !");
+
+                        String text = b.getString(TEXT_ARG);
+                        int type = b.getInt(ICON_ARG);
+                        ((PopUpFragment)fragment).addMessageInternal(type, text);
+                        break;
+                    case REMOVE_MESSAGE_0:
+                        ((PopUpFragment)fragment).removeMessage0Internal();
+                        break;
+                }
+            }
+        }
+    }
+
+
+/*    public class MyLinearLayoutManager extends LinearLayoutManager {
+
+        public MyLinearLayoutManager(Context context) {
+            super(context);
+        }
+
+        // Not worked
+        //@Override
+        //public RecyclerView.LayoutParams generateDefaultLayoutParams() {
+        //    return new RecyclerView.LayoutParams(
+        //            RecyclerView.LayoutParams.WRAP_CONTENT,
+        //            RecyclerView.LayoutParams.WRAP_CONTENT);
+        //}
+
+        @Override
+        public boolean supportsPredictiveItemAnimations() {
+            return true;
+        }
+
+        private int[] mMeasuredDimension = new int[2];
+
+        @Override
+        public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+
+            int width = 0;
+            int height = 0;
+            int widthMode=0;
+            int heightMode=0;
+            int widthSize=0;
+            int heightSize=0;
+
+            super.onLayoutChildren(recycler, state);
+
+            if (!state.isPreLayout()) {
+                for (int i = 0; i < getItemCount(); i++) {
+                    View child = recycler.getViewForPosition(i);
+
+                    RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) child.getLayoutParams();
+
+                    int widthUsed = getDecoratedMeasuredWidth(child);
+                    int heightUsed = getDecoratedMeasuredHeight(child);
+
+                    int widthSpec = getChildMeasureSpec(getWidth(),
+                            getPaddingLeft() + getPaddingRight() +
+                                    lp.leftMargin + lp.rightMargin + widthUsed, lp.width,
+                            canScrollHorizontally());
+
+
+                    int heightSpec = getChildMeasureSpec(getHeight(),
+                            getPaddingTop() + getPaddingBottom() +
+                                    lp.topMargin + lp.bottomMargin + heightUsed, lp.height,
+                            canScrollVertically());
+
+                    widthMode = View.MeasureSpec.getMode(widthSpec);
+                    heightMode = View.MeasureSpec.getMode(heightSpec);
+                    widthSize = View.MeasureSpec.getSize(widthSpec);
+                    heightSize = View.MeasureSpec.getSize(heightSpec);
+
+                    if (getOrientation() == HORIZONTAL) {
+                        measureScrapChild(recycler, i,
+                                View.MeasureSpec.makeMeasureSpec(i, View.MeasureSpec.UNSPECIFIED),
+                                heightSpec,
+                                mMeasuredDimension);
+
+                        width = width + mMeasuredDimension[0];
+                        if (i == 0) {
+                            height = mMeasuredDimension[1];
+                        }
+                    } else {
+                        measureScrapChild(recycler, i,
+                                widthSpec,
+                                View.MeasureSpec.makeMeasureSpec(i, View.MeasureSpec.UNSPECIFIED),
+                                mMeasuredDimension);
+                        height = height + mMeasuredDimension[1];
+                        if (i == 0) {
+                            width = mMeasuredDimension[0];
+                        }
+                    }
+                    onMeasure(recycler, state, widthSpec, heightSpec);
+                }
+
+
+                switch (widthMode) {
+                    case View.MeasureSpec.EXACTLY:
+                        width = widthSize;
+                    case View.MeasureSpec.AT_MOST:
+                    case View.MeasureSpec.UNSPECIFIED:
+                }
+
+                switch (heightMode) {
+                    case View.MeasureSpec.EXACTLY:
+                        height = heightSize;
+                    case View.MeasureSpec.AT_MOST:
+                    case View.MeasureSpec.UNSPECIFIED:
+                }
+
+                setMeasuredDimension(width, height);
+                Log.i(">", "setMeasuredDimension = " + width + " : " + height
+                        + " : state : " + state);
+            }
+
+        }
+
+
+        private void measureScrapChild(RecyclerView.Recycler recycler, int position, int widthSpec,
+                                       int heightSpec, int[] measuredDimension) {
+
+            View view = recycler.getViewForPosition(position);
+            if (view != null) {
+                // For adding Item Decor Insets to view
+                //super.measureChildWithMargins(view, 0, 0);
+
+                //recycler.bindViewToPosition(view, position);
+
+                RecyclerView.LayoutParams p = (RecyclerView.LayoutParams) view.getLayoutParams();
+                int childWidthSpec = ViewGroup.getChildMeasureSpec(widthSpec,
+                        getPaddingLeft() + getPaddingRight(), p.width);
+                int childHeightSpec = ViewGroup.getChildMeasureSpec(heightSpec,
+                        getPaddingTop() + getPaddingBottom(), p.height);
+                view.measure(childWidthSpec, childHeightSpec);
+                measuredDimension[0] = view.getMeasuredWidth() + p.leftMargin + p.rightMargin;
+                measuredDimension[1] = view.getMeasuredHeight() + p.bottomMargin + p.topMargin;
+                recycler.recycleView(view);
+            }
+        }
+
+    }*/
+
+
+
+
+/*
+
+
+
+        public class MyLinearLayoutManager extends LinearLayoutManager {
 
         public MyLinearLayoutManager(Context context)    {
             super(context);
@@ -241,11 +416,11 @@ public class PopUpFragment extends Fragment{
         }
 
         // Not worked
-        @Override
-        public boolean canScrollVertically() {
+        //@Override
+        //public boolean canScrollVertically() {
             //We do allow scrolling
-            return true;
-        }
+        //    return true;
+        //}
 
         private int[] mMeasuredDimension = new int[2];
 
@@ -255,9 +430,10 @@ public class PopUpFragment extends Fragment{
 
             Log.i(">", "state " + state.toString());
 
-            //if ( state.isPreLayout() ) {
-            //    super.onMeasure(recycler, state, widthSpec, heightSpec);
-            //} else
+            if ( state.isPreLayout() ) {
+                super.onMeasure(recycler, state, widthSpec, heightSpec);
+            }
+            else
             {
 
                 final int widthMode = View.MeasureSpec.getMode(widthSpec);
@@ -303,6 +479,9 @@ public class PopUpFragment extends Fragment{
                 }
 
                 setMeasuredDimension(width, height);
+                Log.i(">", "setMeasuredDimension = " + width + " : " + height
+                        + " : state : " + state);
+
             }
         }
 
@@ -311,11 +490,12 @@ public class PopUpFragment extends Fragment{
 
             View view = null;
             // Bellow there is strong hack!
-            try {
-                view = recycler.getViewForPosition(position);
-            }catch (IndexOutOfBoundsException ex){
-                Log.i(">", "IndexOutOfBoundsException = " + ex + "position : " + position);
-            }
+            //try {
+            //    view = recycler.getViewForPosition(position);
+            //}catch (IndexOutOfBoundsException ex){
+            //    Log.i(">", "IndexOutOfBoundsException = " + ex + "position : " + position);
+            //}
+            view = recycler.getViewForPosition(position);
 
 
             if (view != null) {
@@ -337,43 +517,6 @@ public class PopUpFragment extends Fragment{
             }
         }
     }
-
-    private class HandlerOverlayMessages <T> extends Handler {
-
-        public static final int ADD_MESSAGE = 100;
-        public static final int REMOVE_MESSAGE_0 = 101;
-        public static final String TEXT_ARG = "text";
-        public static final String ICON_ARG = "icon";
-
-        private final T fragment;
-
-        public HandlerOverlayMessages(T fragment ){
-            this.fragment = fragment;
-        }
-
-        @Override
-        public void handleMessage(Message message){
-            if (this.fragment != null){
-
-                Bundle b = message.getData();
-
-                switch (message.what){
-                    case ADD_MESSAGE:
-                        if(b == null)
-                            new IllegalArgumentException("Message should be have params !");
-
-                        String text = b.getString(TEXT_ARG);
-                        int type = b.getInt(ICON_ARG);
-                        ((PopUpFragment)fragment).addMessageInternal(type, text);
-                        break;
-                    case REMOVE_MESSAGE_0:
-                        ((PopUpFragment)fragment).removeMessage0Internal();
-                        break;
-                }
-            }
-        }
-
-    }
-
+ */
 
 }

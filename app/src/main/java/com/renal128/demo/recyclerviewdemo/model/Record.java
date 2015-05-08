@@ -5,8 +5,18 @@ import android.os.Parcelable;
 
 public class Record implements Parcelable {
 
+    private long id;
+
     public Record() {
 
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public enum Type {RED, GREEN, YELLOW}
@@ -30,16 +40,18 @@ public class Record implements Parcelable {
         this.type = type;
     }
 
-    public Record copy(){
+    public Record copy() {
         Record copy = new Record();
         copy.setType(type);
         copy.setName(name);
+        copy.setId(id);
         return copy;
     }
 
     protected Record(Parcel in) {
         name = in.readString();
         type = (Type) in.readValue(Type.class.getClassLoader());
+        id = in.readLong();
     }
 
     @Override
@@ -51,6 +63,7 @@ public class Record implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeValue(type);
+        dest.writeLong(id);
     }
 
     @SuppressWarnings("unused")

@@ -16,11 +16,14 @@ import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
+    private static final String TAG = RecyclerViewAdapter.class.getSimpleName();
     private List<Record> records;
 
     public RecyclerViewAdapter(List<Record> records) {
         this.records = records;
+        setHasStableIds(true);
     }
+
 
     public List<Record> getRecords() {
         return records;
@@ -61,9 +64,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private void copy(Record record) {
         int position = records.indexOf(record);
         Record copy = record.copy();
+        copy.setId(records.get(records.size()-1).getId()+1);
         records.add(position + 1, copy);
-        notifyItemInserted(position + 1);
-        //notifyDataSetChanged();
+        //notifyItemInserted(position + 1);
+        notifyDataSetChanged();
     }
 
     private void delete(Record record) {
@@ -71,9 +75,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         Log.i(">" , "position=" + position);
         if( position != -1 ) {
             records.remove(position);
-            notifyItemRemoved(position);
-            //notifyDataSetChanged();
+            //notifyItemRemoved(position);
+            notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public long getItemId(int position){
+        Log.i(TAG, "position = " + position + " : getItemId = " + records.get(position).getId());
+        return records.get(position).getId();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
